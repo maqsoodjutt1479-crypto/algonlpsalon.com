@@ -1,0 +1,368 @@
+﻿{% extends "base.html" %}
+{% set title = "Owner Setup" %}
+{% block content %}
+<section class="card wide space-y-6" data-reveal>
+  <h2>Owner dashboard setup</h2>
+  <p class="muted">Logged in as {{ email }}</p>
+  {% if error %}
+    <div class="alert">{{ error }}</div>
+  {% endif %}
+  <form method="post" action="{{ url_for('create_dashboard') }}" class="form" id="setup-form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+    <div class="form-row">
+      <div>
+        <label>Salon name</label>
+        <input type="text" name="salon_name" placeholder="Sunrise Salon" required />
+      </div>
+      <div>
+        <label>Theme</label>
+        <select name="theme">
+          <option value="sand">Rose</option>
+          <option value="ink">Champagne</option>
+          <option value="mint">Sage</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Address</label>
+        <input type="text" name="address" placeholder="123 Main Road" />
+      </div>
+      <div>
+        <label>Phone</label>
+        <input type="text" name="phone" placeholder="+1 555 0100" />
+      </div>
+    </div>
+
+    <div>
+      <label>About</label>
+      <textarea name="about" rows="3" placeholder="Short salon description"></textarea>
+    </div>
+
+    <div>
+      <label>Services</label>
+      <p class="muted">Choose a category or show both.</p>
+      <div class="choice-row" id="service-category">
+        <label class="toggle">
+          <input type="radio" name="service_category" value="both" checked />
+          <span>Both</span>
+        </label>
+        <label class="toggle">
+          <input type="radio" name="service_category" value="female" />
+          <span>Female</span>
+        </label>
+        <label class="toggle">
+          <input type="radio" name="service_category" value="male" />
+          <span>Male</span>
+        </label>
+      </div>
+      <h4 class="service-section-title" data-service-group="female">Female services</h4>
+      <div class="service-grid" data-service-group="female">
+        {% for svc in services_female %}
+          <label class="service-pill">
+            <input type="checkbox" name="services" value="{{ svc }}" checked />
+            <span>{{ svc }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      <h4 class="service-section-title" data-service-group="male">Male services</h4>
+      <div class="service-grid" data-service-group="male">
+        {% for svc in services_male %}
+          <label class="service-pill">
+            <input type="checkbox" name="services" value="{{ svc }}" />
+            <span>{{ svc }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      <label>Add custom services (one per line)</label>
+      <textarea name="custom_services" rows="3" placeholder="e.g.\nHair spa\nNail care"></textarea>
+    </div>
+
+    <div class="premium-block">
+      <h3>Service pricing (optional)</h3>
+      <div class="form-row">
+        <div>
+          <label>Number of priced services</label>
+          <input type="number" id="pricing-count" min="0" value="0" />
+        </div>
+      </div>
+      <div class="package-list" id="pricing-list"></div>
+    </div>
+
+    <div class="premium-block">
+      <h3>Booking page settings</h3>
+      <div class="form-row">
+        <div>
+          <label>Title</label>
+          <input type="text" name="booking_title" value="Reserve your chair" />
+        </div>
+        <div>
+          <label>Subtitle</label>
+          <input type="text" name="booking_subtitle" value="Book your beauty appointment in seconds." />
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Badge text</label>
+          <input type="text" name="booking_badge" value="Book in 60s" />
+        </div>
+        <div>
+          <label>Availability label</label>
+          <input type="text" name="booking_availability" value="Availability" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+        <label>Show stylist selection</label>
+          <label class="toggle">
+            <input type="checkbox" name="booking_show_barbers" checked />
+            <span>Enabled</span>
+          </label>
+        </div>
+        <div>
+          <label>Show packages</label>
+          <label class="toggle">
+            <input type="checkbox" name="booking_show_packages" checked />
+            <span>Enabled</span>
+          </label>
+        </div>
+      </div>
+      <div>
+        <label>Custom note</label>
+        <textarea name="booking_note" rows="2" placeholder="e.g. We confirm within 10 minutes."></textarea>
+      </div>
+    </div>
+
+    <div class="premium-block">
+      <h3>Premium features (optional)</h3>
+      <div class="form-row">
+        <div>
+          <label>Number of packages</label>
+          <input type="number" id="package-count" min="0" value="0" />
+        </div>
+      </div>
+      <div class="package-list" id="package-list"></div>
+
+      <div class="form-row">
+        <div>
+          <label>Reminder services</label>
+          <div class="reminder-row">
+            <label class="toggle">
+              <input type="checkbox" name="reminder_sms" />
+              <span>SMS</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" name="reminder_whatsapp" />
+              <span>WhatsApp</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" name="reminder_email" />
+              <span>Email</span>
+            </label>
+          </div>
+        </div>
+        <div>
+          <label>Reminder note</label>
+          <input type="text" name="reminder_note" placeholder="e.g. Remind 2 hours before" />
+        </div>
+      </div>
+
+      <div>
+        <label>Other premium features</label>
+        <input type="text" name="extras_title" placeholder="e.g. Premium add-ons" />
+        <textarea name="extras_items" rows="3" placeholder="One item per line"></textarea>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Number of chairs</label>
+        <div class="choice-row">
+          <input type="number" name="chairs" id="chairs-count" min="1" value="4" required />
+          <button class="btn ghost" type="button" id="add-chair">Add chair</button>
+          <button class="btn ghost" type="button" id="remove-chair">Remove chair</button>
+        </div>
+      </div>
+      <div>
+        <label>Number of stylists</label>
+        <div class="choice-row">
+          <input type="number" id="barber-count" min="1" value="2" />
+          <button class="btn ghost" type="button" id="add-stylist">Add stylist</button>
+          <button class="btn ghost" type="button" id="remove-stylist">Remove stylist</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Open time</label>
+        <input type="time" name="open_time" required />
+      </div>
+      <div>
+        <label>Close time</label>
+        <input type="time" name="close_time" required />
+      </div>
+    </div>
+
+    <div class="barber-list" id="barber-list"></div>
+
+    <button class="btn primary" type="submit">Create dashboard</button>
+  </form>
+</section>
+
+<script>
+  const barberList = document.getElementById('barber-list');
+  const barberCountInput = document.getElementById('barber-count');
+  const packageList = document.getElementById('package-list');
+  const packageCountInput = document.getElementById('package-count');
+  const pricingList = document.getElementById('pricing-list');
+  const pricingCountInput = document.getElementById('pricing-count');
+  const chairsCountInput = document.getElementById('chairs-count');
+  const addChairBtn = document.getElementById('add-chair');
+  const removeChairBtn = document.getElementById('remove-chair');
+  const addStylistBtn = document.getElementById('add-stylist');
+  const removeStylistBtn = document.getElementById('remove-stylist');
+
+  function renderBarbers(count) {
+    barberList.innerHTML = '';
+    const total = Math.max(1, Number(count || 1));
+    for (let i = 1; i <= total; i += 1) {
+      const row = document.createElement('div');
+      row.className = 'barber-row';
+      row.innerHTML = `
+        <div>
+          <label>Stylist ${i} name</label>
+          <input type="text" name="barber_name" placeholder="Stylist ${i}" required />
+        </div>
+        <div>
+          <label>CNIC</label>
+          <input type="text" name="barber_cnic" placeholder="e.g. 35202-1234567-1" required />
+        </div>
+        <label class="toggle">
+          <input type="checkbox" name="barber_active" value="Stylist ${i}" checked />
+          <span>Active</span>
+        </label>
+      `;
+      barberList.appendChild(row);
+    }
+    syncActiveValues();
+  }
+
+  function syncActiveValues() {
+    const rows = barberList.querySelectorAll('.barber-row');
+    rows.forEach((row, index) => {
+      const nameInput = row.querySelector('input[name="barber_name"]');
+      const activeInput = row.querySelector('input[name="barber_active"]');
+      nameInput.addEventListener('input', () => {
+        activeInput.value = nameInput.value || `Stylist ${index + 1}`;
+      });
+    });
+  }
+
+  barberCountInput.addEventListener('input', (event) => {
+    renderBarbers(event.target.value);
+  });
+
+  addStylistBtn?.addEventListener('click', () => {
+    const next = Math.max(1, Number(barberCountInput.value || 1)) + 1;
+    barberCountInput.value = String(next);
+    renderBarbers(next);
+  });
+
+  removeStylistBtn?.addEventListener('click', () => {
+    const next = Math.max(1, Number(barberCountInput.value || 1)) - 1;
+    barberCountInput.value = String(Math.max(1, next));
+    renderBarbers(barberCountInput.value);
+  });
+
+  addChairBtn?.addEventListener('click', () => {
+    const next = Math.max(1, Number(chairsCountInput.value || 1)) + 1;
+    chairsCountInput.value = String(next);
+  });
+
+  removeChairBtn?.addEventListener('click', () => {
+    const next = Math.max(1, Number(chairsCountInput.value || 1)) - 1;
+    chairsCountInput.value = String(Math.max(1, next));
+  });
+
+  function renderPackages(count) {
+    packageList.innerHTML = '';
+    const total = Math.max(0, Number(count || 0));
+    for (let i = 1; i <= total; i += 1) {
+      const row = document.createElement('div');
+      row.className = 'package-row';
+      row.innerHTML = `
+        <div>
+          <label>Package ${i} name</label>
+          <input type="text" name="package_name" placeholder="Premium Package ${i}" />
+        </div>
+        <div>
+          <label>Price</label>
+          <input type="text" name="package_price" placeholder="$49" />
+        </div>
+        <div>
+          <label>Duration</label>
+          <input type="text" name="package_duration" placeholder="45 min" />
+        </div>
+        <div>
+          <label>Description</label>
+          <input type="text" name="package_desc" placeholder="Package details" />
+        </div>
+      `;
+      packageList.appendChild(row);
+    }
+  }
+
+  packageCountInput.addEventListener('input', (event) => {
+    renderPackages(event.target.value);
+  });
+
+  function renderPricing(count) {
+    pricingList.innerHTML = '';
+    const total = Math.max(0, Number(count || 0));
+    for (let i = 1; i <= total; i += 1) {
+      const row = document.createElement('div');
+      row.className = 'package-row';
+      row.innerHTML = `
+        <div>
+          <label>Service ${i} name</label>
+          <input type="text" name="service_price_name" placeholder="e.g. Haircut" />
+        </div>
+        <div>
+          <label>Price</label>
+          <input type="text" name="service_price_value" placeholder="$25" />
+        </div>
+      `;
+      pricingList.appendChild(row);
+    }
+  }
+
+  pricingCountInput.addEventListener('input', (event) => {
+    renderPricing(event.target.value);
+  });
+
+  renderBarbers(barberCountInput.value);
+  renderPackages(packageCountInput.value);
+  renderPricing(pricingCountInput.value);
+
+  const serviceCategory = document.getElementById('service-category');
+  const serviceSections = document.querySelectorAll('[data-service-group]');
+
+  function applyServiceFilter(value) {
+    serviceSections.forEach((section) => {
+      const group = section.dataset.serviceGroup;
+      const show = value === 'both' || value === group;
+      section.style.display = show ? '' : 'none';
+    });
+  }
+
+  serviceCategory?.addEventListener('change', (event) => {
+    if (event.target?.name === 'service_category') {
+      applyServiceFilter(event.target.value);
+    }
+  });
+
+  applyServiceFilter('both');
+</script>
+{% endblock %}

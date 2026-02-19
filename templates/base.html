@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en" data-theme="sand">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title if title else "Beauty Salon Dashboard" }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Urbanist:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='tailwind.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}" />
+</head>
+<body data-mode="light">
+  <header class="site-header">
+    <div class="brand" data-i18n="brand">Beauty Salon Dashboard</div>
+    <nav class="site-nav">
+      {% if not hide_home_link %}
+        <a class="nav-link" href="{{ url_for('landing') }}" data-i18n="nav_home">Home</a>
+      {% endif %}
+      {% if settings_link %}
+        <a class="nav-link" href="{{ settings_link }}">Settings</a>
+      {% endif %}
+      {% if not hide_owner_nav %}
+        {% if session.get('email') %}
+          {% if not has_owner %}
+            <a class="nav-link" href="{{ url_for('owner_setup') }}" data-i18n="nav_setup">Owner Setup</a>
+          {% endif %}
+          <a class="nav-link" href="{{ url_for('owner_dashboards') }}" data-i18n="nav_dashboards">My Dashboards</a>
+          <a class="nav-link" href="{{ url_for('logout') }}" data-i18n="nav_logout">Logout</a>
+        {% else %}
+          <a class="nav-link" href="{{ url_for('login') }}" data-i18n="nav_login">Login</a>
+          {% if request.endpoint != 'landing' %}
+            <a class="nav-link" href="{{ url_for('signup_page') }}">Sign up</a>
+          {% endif %}
+        {% endif %}
+      {% endif %}
+    </nav>
+    <div class="header-controls">
+      <button class="btn ghost" type="button" id="theme-toggle">Dark</button>
+      <select id="lang-select" class="lang-select" aria-label="Language">
+        <option value="en">English</option>
+        <option value="ur">Urdu</option>
+      </select>
+    </div>
+  </header>
+  <main class="page">
+    <div class="page-frame">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+  <footer class="site-footer" data-i18n="footer">Luxury beauty. Seamless booking. Effortless control.</footer>
+
+  <script>
+    const body = document.body;
+    const themeToggle = document.getElementById('theme-toggle');
+    const langSelect = document.getElementById('lang-select');
+
+    const translations = {
+      en: {
+        brand: 'Beauty Salon Dashboard',
+        nav_home: 'Home',
+        nav_setup: 'Owner Setup',
+        nav_dashboards: 'My Dashboards',
+        nav_logout: 'Logout',
+        nav_login: 'Login',
+        toggle_dark: 'Dark',
+        toggle_light: 'Light',
+        footer: 'Luxury beauty. Seamless booking. Effortless control.',
+        landing_hero_title: 'A luxury booking experience for modern beauty salons.',
+        landing_hero_sub: 'From QR booking to owner analytics, deliver a premium beauty experience in minutes.',
+        landing_hero_cta: 'Get started',
+        landing_services_title: 'How it works',
+        landing_eyebrow: 'Luxury beauty appointments, always on',
+        landing_trust_setup: 'No setup fee',
+        landing_trust_support: 'Premium support',
+        landing_trust_live: 'Go live in minutes',
+        landing_card_scan_title: 'Scan to book',
+        landing_card_scan_sub: 'Clients scan QR and reserve a slot in seconds.',
+        landing_card_agent_title: 'Agent booking',
+        landing_card_agent_sub: 'Agents can book on behalf of clients.',
+        landing_card_always_title: 'Always on',
+        landing_card_always_sub: '24/7 service coverage for your salon.',
+        landing_step1_title: '1. Sign up',
+        landing_step1_sub: 'Create your owner account in seconds.',
+        landing_step2_title: '2. Configure',
+        landing_step2_sub: 'Choose theme, stylists, chairs, services, and timings.',
+        landing_step3_title: '3. Share',
+        landing_step3_sub: 'Publish your dashboard and share your booking link.',
+        landing_feature_owner_title: 'Owner dashboard',
+        landing_feature_owner_sub: 'Select theme, chairs, stylists, timings, and activation.',
+        landing_feature_client_title: 'Client login',
+        landing_feature_client_sub: 'Clients login through landing page and reach your salon dashboard.',
+        landing_feature_oneclick_title: 'One click create',
+        landing_feature_oneclick_sub: 'Create and share your dashboard link instantly.',
+        pricing_title: 'Pricing',
+        pricing_sub: 'Simple plans for every salon size.',
+        pricing_starter_title: 'Starter',
+        pricing_starter_item1: '1 salon dashboard',
+        pricing_starter_item2: 'Booking page + QR',
+        pricing_starter_item3: 'Up to 3 stylists',
+        pricing_starter_item4: 'Basic services list',
+        pricing_starter_item5: 'Email support',
+        pricing_pro_title: 'Pro',
+        pricing_pro_item1: 'Unlimited stylists',
+        pricing_pro_item2: 'Packages + reminders',
+        pricing_pro_item3: 'Custom booking page text',
+        pricing_pro_item4: 'Owner edit access',
+        pricing_pro_item5: 'Priority support',
+        pricing_business_title: 'Business',
+        pricing_business_item1: 'Up to 5 locations',
+        pricing_business_item2: 'Admin controls',
+        pricing_business_item3: 'Deactivate/activate',
+        pricing_business_item4: 'Advanced booking (future)',
+        pricing_business_item5: 'Dedicated onboarding',
+        auth_title: 'Get started',
+        auth_sub: 'Choose signup or login to continue.',
+        auth_signup: 'Sign up',
+        auth_login: 'Login',
+        auth_signup_title: 'Sign up',
+        auth_signup_sub: 'Create your owner account to build your dashboard.',
+        auth_login_title: 'Login',
+        auth_login_sub: 'Welcome back. Continue to your dashboards.',
+        owner_summary_title: 'My dashboards',
+        owner_create: 'Create dashboard',
+        owner_open: 'Open',
+        owner_edit: 'Edit',
+        owner_activate: 'Activate',
+        owner_deactivate: 'Deactivate',
+        dash_filters_title: 'Search name, email, phone',
+        dash_service_mix: 'Service mix',
+        dash_bookings: 'Bookings',
+        dash_management: 'Management',
+        dash_barbers: 'Stylists',
+        dash_timing: 'Salon timing',
+        dash_save: 'Save settings',
+        dash_open: 'Open',
+        dash_book_cta: 'Book appointment',
+        dash_scan_qr: 'Scan QR',
+        dash_agent_booking: 'Agent booking',
+        dash_notifications: 'Notifications',
+        dash_notifications_sub: 'New bookings appear here.',
+        dash_new_today: 'New today:',
+        dash_created: 'Created:',
+        dash_new: 'New',
+        dash_seen: 'Seen',
+        dash_no_notifications: 'No notifications yet.',
+        dash_filter_start: 'Start date',
+        dash_filter_end: 'End date',
+        dash_filter_stylists: 'Stylists',
+        dash_filter_all_stylists: 'All stylists',
+        dash_filter_services: 'Services',
+        dash_filter_all_services: 'All services',
+        dash_filter_status: 'Status',
+        dash_filter_all_status: 'All status',
+        dash_status_pending: 'Pending',
+        dash_status_confirmed: 'Confirmed',
+        dash_status_cancelled: 'Cancelled',
+        dash_filter_today: 'Today',
+        dash_filter_next7: 'Next 7 days',
+        dash_filter_all: 'All',
+        dash_stat_total: 'Total (filtered)',
+        dash_stat_today: 'Today',
+        dash_stat_next7: 'Next 7 days',
+        dash_stat_calendar: 'Calendar sync issues',
+        dash_stat_stylist: 'Per stylist',
+        dash_no_services: 'No services selected.',
+        dash_packages: 'Packages',
+        dash_reminders: 'Reminder services',
+        dash_reminder_sms: 'SMS',
+        dash_reminder_whatsapp: 'WhatsApp',
+        dash_reminder_email: 'Email',
+        dash_premium_features: 'Premium features',
+        dash_all_dates: 'All dates',
+        dash_show_all: 'Show all bookings',
+        dash_phone: 'Phone:',
+        dash_no_appointments: 'No appointments yet.',
+        dash_refresh: 'Refresh',
+        dash_active: 'Active',
+        dash_paused: 'Paused',
+        dash_pause: 'Pause',
+        dash_timezone: 'Timezone:',
+        dash_timezone_local: 'local',
+        dash_closed: 'Closed',
+        dash_day_monday: 'Monday',
+        dash_day_tuesday: 'Tuesday',
+        dash_day_wednesday: 'Wednesday',
+        dash_day_thursday: 'Thursday',
+        dash_day_friday: 'Friday',
+        dash_day_saturday: 'Saturday',
+        dash_day_sunday: 'Sunday',
+        book_title: 'Book an appointment',
+        admin_login: 'Admin login',
+        admin_panel: 'Admin panel'
+      },
+      ur: {
+        brand: 'سیلون مینوئل ڈیش بورڈ',
+        nav_home: 'ہوم',
+        nav_setup: 'اونر سیٹ اپ',
+        nav_dashboards: 'میرے ڈیش بورڈز',
+        nav_logout: 'لاگ آؤٹ',
+        nav_login: 'لاگ اِن',
+        toggle_dark: 'ڈارک',
+        toggle_light: 'لائٹ',
+        footer: 'پریمیم سروس۔ آسان بُکنگ۔ مکمل کنٹرول۔',
+        landing_hero_title: 'جدید سیلون کے لئے لگژری بُکنگ تجربہ۔',
+        landing_hero_sub: 'کیو آر بُکنگ سے اونر اینالیٹکس تک، چند منٹ میں سب تیار۔',
+        landing_hero_cta: 'شروع کریں',
+        landing_services_title: 'یہ کیسے کام کرتا ہے',
+        landing_eyebrow: 'لگژری بیوٹی اپائنٹمنٹس، ہمیشہ آن',
+        landing_trust_setup: 'کوئی سیٹ اپ فیس نہیں',
+        landing_trust_support: 'پریمیئم سپورٹ',
+        landing_trust_live: 'چند منٹ میں لائیو',
+        landing_card_scan_title: 'بکنگ کے لیے اسکین',
+        landing_card_scan_sub: 'کلائنٹس کیو آر اسکین کر کے سیکنڈز میں سلاٹ ریزرو کرتے ہیں۔',
+        landing_card_agent_title: 'ایجنٹ بکنگ',
+        landing_card_agent_sub: 'ایجنٹس کلائنٹس کی طرف سے بک کر سکتے ہیں۔',
+        landing_card_always_title: 'ہمیشہ آن',
+        landing_card_always_sub: 'آپ کے سیلون کے لیے 24/7 سروس کوریج۔',
+        landing_step1_title: '1. سائن اپ',
+        landing_step1_sub: 'سیکنڈز میں اپنا اونر اکاؤنٹ بنائیں۔',
+        landing_step2_title: '2. سیٹ اپ',
+        landing_step2_sub: 'تھیم، اسٹائلسٹس، چیئرز، سروسز اور ٹائمنگ منتخب کریں۔',
+        landing_step3_title: '3. شیئر',
+        landing_step3_sub: 'اپنا ڈیش بورڈ شائع کریں اور بکنگ لنک شیئر کریں۔',
+        landing_feature_owner_title: 'اونر ڈیش بورڈ',
+        landing_feature_owner_sub: 'تھیم، چیئرز، اسٹائلسٹس، ٹائمنگ اور ایکٹیویشن منتخب کریں۔',
+        landing_feature_client_title: 'کلائنٹ لاگ اِن',
+        landing_feature_client_sub: 'کلائنٹس لینڈنگ پیج سے لاگ اِن کر کے آپ کے سیلون ڈیش بورڈ تک پہنچتے ہیں۔',
+        landing_feature_oneclick_title: 'ون کلک کریئیٹ',
+        landing_feature_oneclick_sub: 'فوری طور پر ڈیش بورڈ لنک بنائیں اور شیئر کریں۔',
+        pricing_title: 'قیمتیں',
+        pricing_sub: 'ہر سائز کے سیلون کے لیے سادہ پلانز۔',
+        pricing_starter_title: 'اسٹارٹر',
+        pricing_starter_item1: '1 سیلون ڈیش بورڈ',
+        pricing_starter_item2: 'بکنگ پیج + کیو آر',
+        pricing_starter_item3: '3 تک اسٹائلسٹس',
+        pricing_starter_item4: 'بیسک سروسز لسٹ',
+        pricing_starter_item5: 'ای میل سپورٹ',
+        pricing_pro_title: 'پرو',
+        pricing_pro_item1: 'لامحدود اسٹائلسٹس',
+        pricing_pro_item2: 'پیکجز + یاددہانی',
+        pricing_pro_item3: 'کسٹم بکنگ پیج ٹیکسٹ',
+        pricing_pro_item4: 'اونر ایڈٹ رسائی',
+        pricing_pro_item5: 'پرائرٹی سپورٹ',
+        pricing_business_title: 'بزنس',
+        pricing_business_item1: '5 تک لوکیشنز',
+        pricing_business_item2: 'ایڈمن کنٹرولز',
+        pricing_business_item3: 'ڈی ایکٹیویٹ/ایکٹیویٹ',
+        pricing_business_item4: 'ایڈوانسڈ بکنگ (آئندہ)',
+        pricing_business_item5: 'ڈیڈیکیٹڈ آن بورڈنگ',
+        auth_title: 'شروع کریں',
+        auth_sub: 'سائن اپ یا لاگ اِن منتخب کریں۔',
+        auth_signup: 'سائن اپ',
+        auth_login: 'لاگ اِن',
+        auth_signup_title: 'سائن اپ',
+        auth_signup_sub: 'اونر اکاؤنٹ بنا کر ڈیش بورڈ تیار کریں۔',
+        auth_login_title: 'لاگ اِن',
+        auth_login_sub: 'خوش آمدید، اپنے ڈیش بورڈز پر جائیں۔',
+        owner_summary_title: 'میرے ڈیش بورڈز',
+        owner_create: 'ڈیش بورڈ بنائیں',
+        owner_open: 'اوپن',
+        owner_edit: 'ایڈٹ',
+        owner_activate: 'ایکٹیویٹ',
+        owner_deactivate: 'ڈی ایکٹیویٹ',
+        dash_filters_title: 'نام، ای میل، فون تلاش کریں',
+        dash_service_mix: 'سروس مکس',
+        dash_bookings: 'بُکنگز',
+        dash_management: 'مینجمنٹ',
+        dash_barbers: 'سٹائلسٹس',
+        dash_timing: 'سیلون ٹائمنگ',
+        dash_save: 'سیو سیٹنگز',
+        dash_open: 'کھلا',
+        dash_book_cta: 'ملاقات بُک کریں',
+        dash_scan_qr: 'کیو آر اسکین کریں',
+        dash_agent_booking: 'ایجنٹ بُکنگ',
+        dash_notifications: 'نوٹیفیکیشنز',
+        dash_notifications_sub: 'نئی بُکنگز یہاں نظر آتی ہیں۔',
+        dash_new_today: 'آج نئی:',
+        dash_created: 'بنائی گئی:',
+        dash_new: 'نئی',
+        dash_seen: 'دیکھی گئی',
+        dash_no_notifications: 'اب کوئی نوٹیفیکیشن نہیں۔',
+        dash_filter_start: 'آغاز کی تاریخ',
+        dash_filter_end: 'اختتام کی تاریخ',
+        dash_filter_stylists: 'اسٹائلسٹس',
+        dash_filter_all_stylists: 'تمام اسٹائلسٹس',
+        dash_filter_services: 'سروسز',
+        dash_filter_all_services: 'تمام سروسز',
+        dash_filter_status: 'اسٹیٹس',
+        dash_filter_all_status: 'تمام اسٹیٹس',
+        dash_status_pending: 'زیرِتجویز',
+        dash_status_confirmed: 'تصدیق شدہ',
+        dash_status_cancelled: 'منسوخ',
+        dash_filter_today: 'آج',
+        dash_filter_next7: 'اگلے 7 دن',
+        dash_filter_all: 'سب',
+        dash_stat_total: 'کل (فلٹر شدہ)',
+        dash_stat_today: 'آج',
+        dash_stat_next7: 'اگلے 7 دن',
+        dash_stat_calendar: 'کیلنڈر سنک مسائل',
+        dash_stat_stylist: 'فی اسٹائلسٹ',
+        dash_no_services: 'کوئی سروس منتخب نہیں کی گئی۔',
+        dash_packages: 'پیکجز',
+        dash_reminders: 'یاددہانی سروسز',
+        dash_reminder_sms: 'ایس ایم ایس',
+        dash_reminder_whatsapp: 'واٹس ایپ',
+        dash_reminder_email: 'ای میل',
+        dash_premium_features: 'پریمیئم فیچرز',
+        dash_all_dates: 'تمام تاریخیں',
+        dash_show_all: 'سب بُکنگز دکھائیں',
+        dash_phone: 'فون:',
+        dash_no_appointments: 'اب تک کوئی ملاقات نہیں۔',
+        dash_refresh: 'تازہ کریں',
+        dash_active: 'فعال',
+        dash_paused: 'موقوف',
+        dash_pause: 'موقوف کریں',
+        dash_timezone: 'ٹائم زون:',
+        dash_timezone_local: 'مقامی',
+        dash_closed: 'بند',
+        dash_day_monday: 'پیر',
+        dash_day_tuesday: 'منگل',
+        dash_day_wednesday: 'بدھ',
+        dash_day_thursday: 'جمعرات',
+        dash_day_friday: 'جمعہ',
+        dash_day_saturday: 'ہفتہ',
+        dash_day_sunday: 'اتوار',
+        book_title: 'سلاٹ بُک کریں',
+        admin_login: 'ایڈمن لاگ اِن',
+        admin_panel: 'ایڈمن پینل'
+      }
+    };
+
+    function applyLang(lang) {
+      const dict = translations[lang] || translations.en;
+      document.querySelectorAll('[data-i18n]').forEach((el) => {
+        const key = el.dataset.i18n;
+        if (dict[key]) {
+          el.textContent = dict[key];
+        }
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+        const key = el.dataset.i18nPlaceholder;
+        if (dict[key]) {
+          el.setAttribute('placeholder', dict[key]);
+        }
+      });
+      localStorage.setItem('lang', lang);
+      langSelect.value = lang;
+      window.__currentLang = lang;
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ur' ? 'rtl' : 'ltr';
+    }
+
+    function applyTheme(mode) {
+      body.dataset.mode = mode;
+      document.documentElement.classList.toggle('dark', mode === 'dark');
+      localStorage.setItem('mode', mode);
+      const lang = window.__currentLang || localStorage.getItem('lang') || 'en';
+      const dict = translations[lang] || translations.en;
+      themeToggle.textContent = mode === 'dark' ? dict.toggle_light : dict.toggle_dark;
+    }
+
+    themeToggle?.addEventListener('click', () => {
+      const current = body.dataset.mode === 'dark' ? 'light' : 'dark';
+      applyTheme(current);
+    });
+
+    langSelect?.addEventListener('change', (e) => {
+      applyLang(e.target.value);
+    });
+
+    window.addEventListener('load', () => {
+      const revealItems = document.querySelectorAll('[data-reveal]');
+      revealItems.forEach((item, index) => {
+        item.classList.add('reveal');
+        item.style.transitionDelay = `${index * 80}ms`;
+        requestAnimationFrame(() => item.classList.add('is-visible'));
+      });
+    });
+
+    applyTheme(localStorage.getItem('mode') || 'light');
+    applyLang(localStorage.getItem('lang') || 'en');
+  </script>
+</body>
+</html>

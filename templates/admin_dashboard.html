@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% set hide_owner_nav = true %}
+{% set title = "Admin Panel" %}
+{% block content %}
+<section class="card wide space-y-4" data-reveal>
+  <div class="dash-top">
+    <div>
+      <h2 data-i18n="admin_panel">Admin panel</h2>
+      <p class="muted">Manage client dashboards and access.</p>
+    </div>
+    <div class="cta-row">
+      <div class="label">Notifications: {{ unread_count or 0 }}</div>
+      {% if unread_count %}
+        <form method="post" action="{{ url_for('admin_notification_read_all') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+          <button class="btn ghost" type="submit">Mark all read</button>
+        </form>
+      {% endif %}
+      <button class="btn ghost" type="button" onclick="document.getElementById('theme-toggle')?.click()">Dark mode</button>
+      <a class="btn ghost" href="{{ url_for('admin_logout') }}">Logout</a>
+    </div>
+  </div>
+  {% if owners %}
+    <div class="booking-list">
+      {% for owner in owners %}
+        <div class="booking-row">
+          <div>
+            <h4>{{ owner.salon_name }}</h4>
+            <p class="muted">{{ owner.email }}</p>
+            <span class="label">Created: {{ owner.created_at }}</span>
+          </div>
+          <div>
+            <p>/dashboard/{{ owner.slug }}</p>
+            <p>/book/{{ owner.slug }}</p>
+            <span class="label">Status: {{ 'Active' if owner.active else 'Inactive' }}</span>
+          </div>
+          <div>
+            <a class="btn ghost" href="{{ url_for('book', slug=owner.slug) }}">Booking page</a>
+            <a class="btn ghost" href="{{ url_for('owner_edit', slug=owner.slug) }}">Settings</a>
+            <form method="post" action="{{ url_for('admin_toggle_owner', owner_id=owner.id) }}">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+              <button class="btn primary" type="submit">
+                {{ 'Deactivate' if owner.active else 'Activate' }}
+              </button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No dashboards yet.</p>
+  {% endif %}
+</section>
+
+<section class="card wide space-y-4" data-reveal>
+  <div class="dash-top">
+    <div>
+      <h2>Notifications</h2>
+      <p class="muted">New bookings appear here.</p>
+    </div>
+  </div>
+  {% if notifications %}
+    <div class="booking-list">
+      {% for n in notifications %}
+        <div class="booking-row">
+          <div>
+            <h4>{{ n.client_name }}</h4>
+            <p class="muted">{{ n.salon_name }}</p>
+            <span class="label">{{ n.preferred_date }} - {{ n.preferred_time }}</span>
+          </div>
+          <div>
+            <p>{{ n.service }}</p>
+            <span class="label">Created: {{ n.created_at }}</span>
+          </div>
+          <div>
+            {% if n.read_at %}
+              <span class="label">Read</span>
+            {% else %}
+              <form method="post" action="{{ url_for('admin_notification_read', notification_id=n.id) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+                <button class="btn primary" type="submit">Mark read</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No notifications yet.</p>
+  {% endif %}
+</section>
+
+<section class="card wide space-y-4" data-reveal>
+  <div class="dash-top">
+    <div>
+      <h2>Appointments</h2>
+      <p class="muted">Click an appointment to edit.</p>
+    </div>
+  </div>
+  {% if bookings %}
+    <div class="booking-list">
+      {% for b in bookings %}
+        <div class="booking-row booking-row-btn">
+          <div
+            class="booking-main"
+            data-booking='{{ {
+              "id": b.id,
+              "salon": b.salon_name,
+              "slug": b.slug,
+              "client_name": b.client_name,
+              "client_phone": b.client_phone,
+              "service": b.service,
+              "barber_name": b.barber_name,
+              "preferred_date": b.preferred_date,
+              "preferred_time": b.preferred_time,
+              "status": b.status or "Pending"
+            } | tojson }}'
+          >
+            <div>
+              <h4>{{ b.client_name }}</h4>
+              <p class="muted">{{ b.salon_name }}</p>
+              <span class="label">{{ b.preferred_date }} - {{ b.preferred_time }}</span>
+            </div>
+            <div>
+              <p>{{ b.service }}</p>
+              <span class="label">{{ b.barber_name or 'Any stylist' }}</span>
+            </div>
+            <div class="booking-status">{{ b.status or 'Pending' }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No appointments yet.</p>
+  {% endif %}
+</section>
+
+<div class="drawer" id="booking-drawer" aria-hidden="true">
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <h3>Edit appointment</h3>
+      <button class="btn ghost" type="button" id="drawer-close">Close</button>
+    </div>
+    <form method="post" id="drawer-form" class="form">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+      <label>Client name</label>
+      <input type="text" name="client_name" required />
+
+      <label>Client phone</label>
+      <input type="text" name="client_phone" required />
+
+      <label>Service</label>
+      <input type="text" name="service" required />
+
+      <label>Stylist</label>
+      <input type="text" name="barber_name" />
+
+      <div class="form-row">
+        <div>
+          <label>Date</label>
+          <input type="date" name="preferred_date" required />
+        </div>
+        <div>
+          <label>Time</label>
+          <input type="time" name="preferred_time" required />
+        </div>
+      </div>
+
+      <label>Status</label>
+      <select name="status">
+        <option value="Pending">Pending</option>
+        <option value="Confirmed">Confirmed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+
+      <button class="btn primary" type="submit">Save changes</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const drawer = document.getElementById('booking-drawer');
+  const closeBtn = document.getElementById('drawer-close');
+  const form = document.getElementById('drawer-form');
+  const bookingButtons = document.querySelectorAll('.booking-main');
+
+  function openDrawer(data) {
+    form.action = `/admin/booking/${data.id}`;
+    form.client_name.value = data.client_name || '';
+    form.client_phone.value = data.client_phone || '';
+    form.service.value = data.service || '';
+    form.barber_name.value = data.barber_name || '';
+    form.preferred_date.value = data.preferred_date || '';
+    form.preferred_time.value = data.preferred_time || '';
+    form.status.value = data.status || 'Pending';
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+  }
+
+  bookingButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const data = JSON.parse(btn.dataset.booking);
+      openDrawer(data);
+    });
+  });
+
+  closeBtn?.addEventListener('click', () => {
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+  });
+</script>
+{% endblock %}

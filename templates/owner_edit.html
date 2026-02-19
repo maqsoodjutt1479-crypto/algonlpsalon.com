@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+{% set title = "Edit Dashboard" %}
+{% block content %}
+<section class="card wide space-y-6" data-reveal>
+  <h2>Edit dashboard</h2>
+  <p class="muted">Update services, stylists, and salon details.</p>
+  {% if error %}
+    <div class="alert">{{ error }}</div>
+  {% endif %}
+  <form method="post" class="form" id="edit-form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+    <div class="form-row">
+      <div>
+        <label>Salon name</label>
+        <input type="text" name="salon_name" value="{{ owner.salon_name }}" required />
+      </div>
+      <div>
+        <label>Theme</label>
+        <select name="theme">
+          <option value="sand" {% if owner.theme == 'sand' %}selected{% endif %}>Rose</option>
+          <option value="ink" {% if owner.theme == 'ink' %}selected{% endif %}>Champagne</option>
+          <option value="mint" {% if owner.theme == 'mint' %}selected{% endif %}>Sage</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Address</label>
+        <input type="text" name="address" value="{{ details.address }}" />
+      </div>
+      <div>
+        <label>Phone</label>
+        <input type="text" name="phone" value="{{ details.phone }}" />
+      </div>
+    </div>
+
+    <div>
+      <label>About</label>
+      <textarea name="about" rows="3">{{ details.about }}</textarea>
+    </div>
+
+    <div>
+      <label>Services</label>
+      <p class="muted">Choose a category or show both.</p>
+      <div class="choice-row" id="service-category">
+        <label class="toggle">
+          <input type="radio" name="service_category" value="both" checked />
+          <span>Both</span>
+        </label>
+        <label class="toggle">
+          <input type="radio" name="service_category" value="female" />
+          <span>Female</span>
+        </label>
+        <label class="toggle">
+          <input type="radio" name="service_category" value="male" />
+          <span>Male</span>
+        </label>
+      </div>
+      <h4 class="service-section-title" data-service-group="female">Female services</h4>
+      <div class="service-grid" data-service-group="female">
+        {% for svc in services_female %}
+          <label class="service-pill">
+            <input type="checkbox" name="services" value="{{ svc }}" {% if svc in selected_services %}checked{% endif %} />
+            <span>{{ svc }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      <h4 class="service-section-title" data-service-group="male">Male services</h4>
+      <div class="service-grid" data-service-group="male">
+        {% for svc in services_male %}
+          <label class="service-pill">
+            <input type="checkbox" name="services" value="{{ svc }}" {% if svc in selected_services %}checked{% endif %} />
+            <span>{{ svc }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      <label>Add custom services (one per line)</label>
+      <textarea name="custom_services" rows="3" placeholder="e.g.\nHair spa\nNail care"></textarea>
+    </div>
+
+    <div class="premium-block">
+      <h3>Service pricing (optional)</h3>
+      <div class="form-row">
+        <div>
+          <label>Number of priced services</label>
+          <input type="number" id="pricing-count" min="0" value="{{ services_pricing | length }}" />
+        </div>
+      </div>
+      <div class="package-list" id="pricing-list"></div>
+    </div>
+
+    <div class="premium-block">
+      <h3>Booking page settings</h3>
+      <div class="form-row">
+        <div>
+          <label>Title</label>
+          <input type="text" name="booking_title" value="{{ booking_settings.title or 'Reserve your chair' }}" />
+        </div>
+        <div>
+          <label>Subtitle</label>
+          <input type="text" name="booking_subtitle" value="{{ booking_settings.subtitle or 'Book your beauty appointment in seconds.' }}" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Badge text</label>
+          <input type="text" name="booking_badge" value="{{ booking_settings.badge or 'Book in 60s' }}" />
+        </div>
+        <div>
+          <label>Availability label</label>
+          <input type="text" name="booking_availability" value="{{ booking_settings.availability_prefix or 'Availability' }}" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Show stylist selection</label>
+          <label class="toggle">
+            <input type="checkbox" name="booking_show_barbers" {% if booking_settings.show_barbers %}checked{% endif %} />
+            <span>Enabled</span>
+          </label>
+        </div>
+        <div>
+          <label>Show packages</label>
+          <label class="toggle">
+            <input type="checkbox" name="booking_show_packages" {% if booking_settings.show_packages %}checked{% endif %} />
+            <span>Enabled</span>
+          </label>
+        </div>
+      </div>
+      <div>
+        <label>Custom note</label>
+        <textarea name="booking_note" rows="2">{{ booking_settings.note }}</textarea>
+      </div>
+    </div>
+
+    <div class="premium-block">
+      <h3>Premium features (optional)</h3>
+      <div class="form-row">
+        <div>
+          <label>Number of packages</label>
+          <input type="number" id="package-count" min="0" value="{{ packages | length }}" />
+        </div>
+      </div>
+      <div class="package-list" id="package-list"></div>
+
+      <div class="form-row">
+        <div>
+          <label>Reminder services</label>
+          <div class="reminder-row">
+            <label class="toggle">
+              <input type="checkbox" name="reminder_sms" {% if reminders.sms %}checked{% endif %} />
+              <span>SMS</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" name="reminder_whatsapp" {% if reminders.whatsapp %}checked{% endif %} />
+              <span>WhatsApp</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" name="reminder_email" {% if reminders.email %}checked{% endif %} />
+              <span>Email</span>
+            </label>
+          </div>
+        </div>
+        <div>
+          <label>Reminder note</label>
+          <input type="text" name="reminder_note" value="{{ reminders.note }}" />
+        </div>
+      </div>
+
+      <div>
+        <label>Other premium features</label>
+        <input type="text" name="extras_title" value="{{ extras.title }}" />
+        <textarea name="extras_items" rows="3">{{ extras.get('items', []) | join('\n') }}</textarea>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Number of chairs</label>
+        <input type="number" name="chairs" min="1" value="{{ owner.chairs }}" required />
+      </div>
+      <div>
+        <label>Number of stylists</label>
+        <input type="number" id="barber-count" min="1" value="{{ barbers | length }}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Open time</label>
+        <input type="time" name="open_time" value="{{ owner.open_time }}" required />
+      </div>
+      <div>
+        <label>Close time</label>
+        <input type="time" name="close_time" value="{{ owner.close_time }}" required />
+      </div>
+    </div>
+
+    <div class="barber-list" id="barber-list"></div>
+
+    <button class="btn primary" type="submit">Save changes</button>
+  </form>
+</section>
+
+<script>
+  const barberList = document.getElementById('barber-list');
+  const barberCountInput = document.getElementById('barber-count');
+  const packageList = document.getElementById('package-list');
+  const packageCountInput = document.getElementById('package-count');
+  const pricingList = document.getElementById('pricing-list');
+  const pricingCountInput = document.getElementById('pricing-count');
+  const existingBarbers = {{ barbers | tojson }};
+  const existingPackages = {{ packages | tojson }};
+  const existingPricing = {{ services_pricing | tojson }};
+
+  function renderBarbers(count) {
+    barberList.innerHTML = '';
+    const total = Math.max(1, Number(count || 1));
+    for (let i = 0; i < total; i += 1) {
+      const barber = existingBarbers[i] || { name: `Stylist ${i + 1}`, cnic: '', active: true };
+      const row = document.createElement('div');
+      row.className = 'barber-row';
+      row.innerHTML = `
+        <div>
+          <label>Stylist ${i + 1} name</label>
+          <input type="text" name="barber_name" value="${barber.name}" required />
+        </div>
+        <div>
+          <label>CNIC</label>
+          <input type="text" name="barber_cnic" value="${barber.cnic || ''}" required />
+        </div>
+        <label class="toggle">
+          <input type="checkbox" name="barber_active" value="${barber.name}" ${barber.active ? 'checked' : ''} />
+          <span>Active</span>
+        </label>
+      `;
+      barberList.appendChild(row);
+    }
+    syncActiveValues();
+  }
+
+  function syncActiveValues() {
+    const rows = barberList.querySelectorAll('.barber-row');
+    rows.forEach((row, index) => {
+      const nameInput = row.querySelector('input[name="barber_name"]');
+      const activeInput = row.querySelector('input[name="barber_active"]');
+      nameInput.addEventListener('input', () => {
+        activeInput.value = nameInput.value || `Stylist ${index + 1}`;
+      });
+    });
+  }
+
+  barberCountInput.addEventListener('input', (event) => {
+    renderBarbers(event.target.value);
+  });
+
+  function renderPackages(count) {
+    packageList.innerHTML = '';
+    const total = Math.max(0, Number(count || 0));
+    for (let i = 0; i < total; i += 1) {
+      const pkg = existingPackages[i] || { name: `Package ${i + 1}`, price: '', duration: '', description: '' };
+      const row = document.createElement('div');
+      row.className = 'package-row';
+      row.innerHTML = `
+        <div>
+          <label>Package ${i + 1} name</label>
+          <input type="text" name="package_name" value="${pkg.name}" />
+        </div>
+        <div>
+          <label>Price</label>
+          <input type="text" name="package_price" value="${pkg.price || ''}" />
+        </div>
+        <div>
+          <label>Duration</label>
+          <input type="text" name="package_duration" value="${pkg.duration || ''}" />
+        </div>
+        <div>
+          <label>Description</label>
+          <input type="text" name="package_desc" value="${pkg.description || ''}" />
+        </div>
+      `;
+      packageList.appendChild(row);
+    }
+  }
+
+  packageCountInput.addEventListener('input', (event) => {
+    renderPackages(event.target.value);
+  });
+
+  function renderPricing(count) {
+    pricingList.innerHTML = '';
+    const total = Math.max(0, Number(count || 0));
+    for (let i = 0; i < total; i += 1) {
+      const pricing = existingPricing[i] || { name: `Service ${i + 1}`, price: '' };
+      const row = document.createElement('div');
+      row.className = 'package-row';
+      row.innerHTML = `
+        <div>
+          <label>Service ${i + 1} name</label>
+          <input type="text" name="service_price_name" value="${pricing.name || ''}" />
+        </div>
+        <div>
+          <label>Price</label>
+          <input type="text" name="service_price_value" value="${pricing.price || ''}" />
+        </div>
+      `;
+      pricingList.appendChild(row);
+    }
+  }
+
+  pricingCountInput.addEventListener('input', (event) => {
+    renderPricing(event.target.value);
+  });
+
+  renderBarbers(barberCountInput.value);
+  renderPackages(packageCountInput.value);
+  renderPricing(pricingCountInput.value);
+
+  const serviceCategory = document.getElementById('service-category');
+  const serviceSections = document.querySelectorAll('[data-service-group]');
+
+  function applyServiceFilter(value) {
+    serviceSections.forEach((section) => {
+      const group = section.dataset.serviceGroup;
+      const show = value === 'both' || value === group;
+      section.style.display = show ? '' : 'none';
+    });
+  }
+
+  serviceCategory?.addEventListener('change', (event) => {
+    if (event.target?.name === 'service_category') {
+      applyServiceFilter(event.target.value);
+    }
+  });
+
+  applyServiceFilter('both');
+</script>
+{% endblock %}

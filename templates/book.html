@@ -1,0 +1,142 @@
+﻿{% extends "base.html" %}
+{% set hide_owner_nav = true %}
+{% set title = "Book Appointment" %}
+{% block content %}
+<section class="card narrow booking-shell" data-reveal>
+  <h2 data-i18n="book_title">{{ booking_settings.title or 'Book an appointment' }}</h2>
+  <p class="muted">{{ salon_name }}</p>
+  {% if error %}
+    <div class="alert">{{ error }}</div>
+  {% endif %}
+  {% if success %}
+    <div class="success">{{ success }}</div>
+  {% endif %}
+  <form method="post" class="form booking-form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+    {% if barbers and booking_settings.show_barbers %}
+      <label>Choose stylist</label>
+      {% set preferred_stylist = 'sara' %}
+      {% set ns = namespace(has_preferred=false) %}
+      {% for barber in barbers %}
+        {% if barber.name | lower == preferred_stylist %}
+          {% set ns.has_preferred = true %}
+        {% endif %}
+      {% endfor %}
+      <select name="barber_name" id="barber-select" required>
+        {% for barber in barbers %}
+          {% set is_preferred = barber.name | lower == preferred_stylist %}
+          <option value="{{ barber.name }}" {% if is_preferred or (not ns.has_preferred and loop.first) %}selected{% endif %}>
+            {{ barber.name }}
+          </option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <label>Enter your name</label>
+    <input type="text" name="client_name" required />
+
+    <label>Enter mobile number</label>
+    <input type="text" name="client_phone" required />
+
+    {% if packages and booking_settings.show_packages %}
+      <label>Choose package</label>
+      <div class="choice-row">
+        {% for pkg in packages %}
+          <label class="choice-pill">
+            <input type="radio" name="package_service" value="{{ pkg.name }}" {% if loop.first %}checked{% endif %} />
+            <span>{{ pkg.name }}{% if pkg.duration %} ({{ pkg.duration }}){% endif %}</span>
+          </label>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if services %}
+      <label>Choose service</label>
+      <select name="service" {% if not packages %}required{% endif %}>
+        {% for svc in services %}
+          <option value="{{ svc }}">{{ svc }}{% if service_price_map.get(svc) %} - {{ service_price_map.get(svc) }}{% endif %}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <label>Preferred date</label>
+    <input type="date" name="preferred_date" id="preferred-date" required />
+
+    <label>Preferred time</label>
+    <select name="preferred_time" id="preferred-time" required>
+      <option value="">Select a time</option>
+    </select>
+    <div id="time-help" class="muted">Select a date and stylist to see available slots.</div>
+
+    <label>Reminder</label>
+    <label class="toggle">
+      <input type="checkbox" name="reminder_enabled" />
+      <span>Send SMS reminder</span>
+    </label>
+    <label>Reminder time</label>
+    <select name="reminder_offset">
+      <option value="30">30 minutes before</option>
+      <option value="60" selected>1 hour before</option>
+      <option value="120">2 hours before</option>
+      <option value="1440">1 day before</option>
+    </select>
+
+    <button class="btn primary" type="submit">Confirm appointment</button>
+  </form>
+  {% if booking_settings.note %}
+    <p class="muted">{{ booking_settings.note }}</p>
+  {% endif %}
+</section>
+
+<script>
+  const dateInput = document.getElementById('preferred-date');
+  const barberSelect = document.getElementById('barber-select');
+  const timeHelp = document.getElementById('time-help');
+  const timeInput = document.getElementById('preferred-time');
+  dateInput.value = new Date().toISOString().split('T')[0];
+
+  function renderSlots(slots) {
+    timeInput.innerHTML = '<option value="">Select a time</option>';
+    if (!slots.length) {
+      timeHelp.textContent = 'No slots available. Select another time or date.';
+      return;
+    }
+    timeHelp.textContent = 'Choose a time slot.';
+    slots.forEach((slot) => {
+      const opt = document.createElement('option');
+      opt.value = slot;
+      opt.textContent = slot;
+      timeInput.appendChild(opt);
+    });
+  }
+
+  async function loadSlots() {
+    const date = dateInput.value;
+    const barber = barberSelect ? barberSelect.value : '';
+    if (!date) {
+      timeHelp.textContent = 'Select a date to see available slots.';
+      timeInput.innerHTML = '<option value="">Select a time</option>';
+      return;
+    }
+    timeHelp.textContent = 'Loading slots...';
+    const baseUrl = "/api/availability/{{ slug }}";
+    const url = new URL(baseUrl, window.location.origin);
+    url.searchParams.set('date', date);
+    url.searchParams.set('barber', barber);
+    try {
+      const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      renderSlots(data.slots || []);
+    } catch (err) {
+      timeHelp.textContent = 'Unable to load slots. Please try again.';
+    }
+  }
+
+  dateInput.addEventListener('change', loadSlots);
+  barberSelect?.addEventListener('change', loadSlots);
+  loadSlots();
+</script>
+{% endblock %}

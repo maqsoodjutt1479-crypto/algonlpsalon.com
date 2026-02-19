@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+{% set hide_owner_nav = true %}
+{% set hide_home_link = true %}
+{% set title = salon_name %}
+{% if session.get('email') or session.get('is_admin') %}
+  {% set settings_link = url_for('owner_edit', slug=slug) %}
+{% endif %}
+{% block content %}
+<section class="dashboard-shell" data-theme="{{ theme }}" data-reveal>
+  <header class="dash-top">
+    <div>
+      <h1>{{ salon_name }}</h1>
+      <p class="muted"><span data-i18n="dash_open">Open</span> {{ open_time }} - {{ close_time }}</p>
+      {% if details.address %}<p class="muted">{{ details.address }}</p>{% endif %}
+      {% if details.phone %}<p class="muted">{{ details.phone }}</p>{% endif %}
+    </div>
+    <div class="cta-row">
+      <a class="btn primary" href="{{ url_for('book', slug=slug) }}" data-i18n="dash_book_cta">Book appointment</a>
+      <a class="btn ghost" href="{{ url_for('scan_qr', slug=slug) }}" data-i18n="dash_scan_qr">Scan QR</a>
+      <button class="btn ghost" type="button" data-i18n="dash_agent_booking">Agent booking</button>
+    </div>
+  </header>
+
+  <section class="card space-y-3" data-reveal>
+    <div class="dash-top">
+      <div>
+        <h3 data-i18n="dash_notifications">Notifications</h3>
+        <p class="muted" data-i18n="dash_notifications_sub">New bookings appear here.</p>
+      </div>
+      <div class="label"><span data-i18n="dash_new_today">New today:</span> {{ new_today_count }}</div>
+    </div>
+    {% if recent_bookings %}
+      <div class="booking-list">
+        {% for booking in recent_bookings %}
+          <div class="booking-row">
+            <div>
+              <h4>{{ booking.client_name }}</h4>
+              <p class="muted">{{ booking.service }}</p>
+            </div>
+            <div>
+              <p>{{ booking.preferred_date }} - {{ booking.preferred_time }}</p>
+              <span class="label"><span data-i18n="dash_created">Created:</span> {{ booking.created_at }}</span>
+            </div>
+            <div>
+              {% if booking.is_new %}
+                <span class="label" data-i18n="dash_new">New</span>
+              {% else %}
+                <span class="label" data-i18n="dash_seen">Seen</span>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted" data-i18n="dash_no_notifications">No notifications yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="filters" data-reveal>
+    <div class="filter-card">
+      <input type="text" placeholder="Search name, email, phone" data-i18n-placeholder="dash_filters_title" />
+      <div class="filter-row">
+        <div>
+          <label data-i18n="dash_filter_start">Start date</label>
+          <input type="date" />
+        </div>
+        <div>
+          <label data-i18n="dash_filter_end">End date</label>
+          <input type="date" />
+        </div>
+        <div>
+          <label data-i18n="dash_filter_stylists">Stylists</label>
+          <select>
+            <option data-i18n="dash_filter_all_stylists">All stylists</option>
+            {% for barber in barbers %}
+              <option>{{ barber.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label data-i18n="dash_filter_services">Services</label>
+          <select>
+            <option data-i18n="dash_filter_all_services">All services</option>
+            {% for svc in services %}
+              <option>{{ svc }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label data-i18n="dash_filter_status">Status</label>
+          <select>
+            <option data-i18n="dash_filter_all_status">All status</option>
+            <option data-i18n="dash_status_pending">Pending</option>
+            <option data-i18n="dash_status_confirmed">Confirmed</option>
+            <option data-i18n="dash_status_cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="filter-actions">
+      <button class="btn ghost" type="button" data-i18n="dash_filter_today">Today</button>
+      <button class="btn ghost" type="button" data-i18n="dash_filter_next7">Next 7 days</button>
+      <button class="btn ghost" type="button" data-i18n="dash_filter_all">All</button>
+    </div>
+  </section>
+
+  <section class="stat-grid" data-reveal>
+    <div class="stat-card">
+      <span class="label" data-i18n="dash_stat_total">Total (filtered)</span>
+      <h3>{{ total_count }}</h3>
+    </div>
+    <div class="stat-card">
+      <span class="label" data-i18n="dash_stat_today">Today</span>
+      <h3>{{ today_count }}</h3>
+    </div>
+    <div class="stat-card">
+      <span class="label" data-i18n="dash_stat_next7">Next 7 days</span>
+      <h3>{{ next_seven_count }}</h3>
+    </div>
+    <div class="stat-card">
+      <span class="label" data-i18n="dash_stat_calendar">Calendar sync issues</span>
+      <h3>0</h3>
+    </div>
+    <div class="stat-card">
+      <span class="label" data-i18n="dash_stat_stylist">Per stylist</span>
+      <p>
+        {% for barber in barbers %}
+          {{ barber.name }}: 0{% if not loop.last %} - {% endif %}
+        {% endfor %}
+      </p>
+    </div>
+  </section>
+
+  <section class="service-mix" data-reveal>
+    <h3 data-i18n="dash_service_mix">Service mix</h3>
+    <div class="service-stack">
+      {% for svc, count in service_counts.items() %}
+        <div class="service-line">
+          <div>
+            <strong>{{ svc }}</strong>
+            {% if service_price_map.get(svc) %}
+              <div class="muted">{{ service_price_map.get(svc) }}</div>
+            {% endif %}
+          </div>
+          <span>{{ count }}</span>
+        </div>
+      {% endfor %}
+      {% if not service_counts %}
+        <p class="muted" data-i18n="dash_no_services">No services selected.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if packages %}
+    <section class="premium-panel" data-reveal>
+      <h3 data-i18n="dash_packages">Packages</h3>
+      <div class="package-grid">
+        {% for pkg in packages %}
+          <div class="package-card">
+            <h4>{{ pkg.name }}</h4>
+            {% if pkg.price %}<p class="price">{{ pkg.price }}</p>{% endif %}
+            {% if pkg.duration %}<p class="muted">{{ pkg.duration }}</p>{% endif %}
+            {% if pkg.description %}<p>{{ pkg.description }}</p>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if reminders.sms or reminders.whatsapp or reminders.email or reminders.note %}
+    <section class="premium-panel" data-reveal>
+      <h3 data-i18n="dash_reminders">Reminder services</h3>
+      <div class="reminder-tags">
+        {% if reminders.sms %}<span class="service-tag" data-i18n="dash_reminder_sms">SMS</span>{% endif %}
+        {% if reminders.whatsapp %}<span class="service-tag" data-i18n="dash_reminder_whatsapp">WhatsApp</span>{% endif %}
+        {% if reminders.email %}<span class="service-tag" data-i18n="dash_reminder_email">Email</span>{% endif %}
+      </div>
+      {% if reminders.note %}<p class="muted">{{ reminders.note }}</p>{% endif %}
+    </section>
+  {% endif %}
+
+  {% if extras.title or extras.get('items') %}
+    <section class="premium-panel" data-reveal>
+      {% if extras.title %}
+        <h3>{{ extras.title }}</h3>
+      {% else %}
+        <h3 data-i18n="dash_premium_features">Premium features</h3>
+      {% endif %}
+      <div class="extras-list">
+        {% for item in extras.get('items', []) %}
+          <div class="service-line">
+            <strong>{{ item }}</strong>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="bookings-panel" data-reveal>
+    <header>
+      <h3 data-i18n="dash_bookings">Bookings</h3>
+      <div class="booking-tabs">
+        <button class="btn ghost" type="button" data-i18n="dash_all_dates">All dates</button>
+        <button class="btn ghost" type="button" data-i18n="dash_show_all">Show all bookings</button>
+      </div>
+    </header>
+    {% if bookings %}
+      <div class="booking-list">
+        {% for booking in bookings %}
+          <div class="booking-row">
+            <div>
+              <h4>{{ booking.client_name }}</h4>
+              <p class="muted">{{ booking.service }}</p>
+            </div>
+            <div>
+              <p>{{ booking.preferred_date }} - {{ booking.preferred_time }}</p>
+              <span class="label"><span data-i18n="dash_phone">Phone:</span> {{ booking.client_phone }}</span>
+            </div>
+            <div class="booking-status" data-i18n="dash_status_pending">Pending</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted" data-i18n="dash_no_appointments">No appointments yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="management" data-reveal>
+    <div class="management-card">
+      <header>
+        <h3 data-i18n="dash_barbers">Stylists</h3>
+        <button class="btn ghost" type="button" data-i18n="dash_refresh">Refresh</button>
+      </header>
+      <div class="barber-list">
+        {% for barber in barbers %}
+          <div class="barber-row">
+            <div>
+              <strong>{{ barber.name }}</strong>
+              {% if barber.active %}
+                <span class="label" data-i18n="dash_active">Active</span>
+              {% else %}
+                <span class="label" data-i18n="dash_paused">Paused</span>
+              {% endif %}
+            </div>
+            <div class="toggle-row">
+              <label class="pill-toggle">
+                <input type="checkbox" {% if barber.active %}checked{% endif %} />
+                <span data-i18n="dash_active">Active</span>
+              </label>
+              <button class="btn ghost" type="button" data-i18n="dash_pause">Pause</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="management-card">
+      <header>
+        <h3 data-i18n="dash_timing">Salon timing</h3>
+        <span class="label"><span data-i18n="dash_timezone">Timezone:</span> <span data-i18n="dash_timezone_local">local</span></span>
+      </header>
+      <div class="timing-grid">
+        {% for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] %}
+          <div class="timing-row">
+            <strong data-i18n="dash_day_{{ day|lower }}">{{ day }}</strong>
+            <input type="time" value="{{ open_time }}" />
+            <input type="time" value="{{ close_time }}" />
+            <label class="toggle">
+              <input type="checkbox" />
+              <span data-i18n="dash_closed">Closed</span>
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+      <button class="btn primary" type="button" data-i18n="dash_save">Save settings</button>
+    </div>
+  </section>
+</section>
+{% endblock %}

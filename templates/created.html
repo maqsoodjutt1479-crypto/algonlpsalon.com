@@ -1,0 +1,44 @@
+﻿{% extends "base.html" %}
+{% set title = "Dashboard Created" %}
+{% block content %}
+<section class="card narrow space-y-4" data-reveal>
+  <h2>Dashboard created</h2>
+  <p class="muted">{{ salon_name }} is live.</p>
+  <div class="link-box">
+    <span>Your dashboard link:</span>
+    <div class="link-row">
+      <a href="{{ dashboard_link }}">{{ dashboard_link }}</a>
+      <button class="btn ghost copy-btn" type="button" data-copy="{{ dashboard_link }}">Copy</button>
+    </div>
+  </div>
+  <div class="link-box">
+    <span>Your booking link:</span>
+    <div class="link-row">
+      <a href="{{ booking_link }}">{{ booking_link }}</a>
+      <button class="btn ghost copy-btn" type="button" data-copy="{{ booking_link }}">Copy</button>
+    </div>
+  </div>
+  <div class="qr-box">
+    <img src="{{ qr_link }}" alt="QR code" />
+    <span>Scan to book</span>
+  </div>
+  <a class="btn primary" href="{{ dashboard_link }}">Open dashboard</a>
+  <a class="btn ghost" href="{{ url_for('owner_edit', slug=slug) }}">Settings</a>
+  <a class="btn ghost" href="{{ dashboards_link }}">My dashboards</a>
+</section>
+
+<script>
+  const copyButtons = document.querySelectorAll('.copy-btn');
+  copyButtons.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy);
+        btn.textContent = 'Copied';
+        setTimeout(() => (btn.textContent = 'Copy'), 1500);
+      } catch (err) {
+        btn.textContent = 'Failed';
+      }
+    });
+  });
+</script>
+{% endblock %}

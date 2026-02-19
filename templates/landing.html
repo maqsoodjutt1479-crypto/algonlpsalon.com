@@ -1,0 +1,109 @@
+﻿{% extends "base.html" %}
+{% set title = "Salon Landing" %}
+{% block content %}
+<div class="landing" data-reveal>
+<section class="hero">
+  <div class="space-y-6" data-reveal>
+    <p class="eyebrow" data-i18n="landing_eyebrow">Luxury beauty appointments, always on</p>
+    <h1 class="text-4xl md:text-6xl font-semibold tracking-tight" data-i18n="landing_hero_title">A luxury booking experience for modern salons.</h1>
+    <p class="lead" data-i18n="landing_hero_sub">From QR booking to owner analytics, deliver a premium experience in minutes.</p>
+    <div class="cta-row">
+      <a class="btn primary" href="{{ url_for('signup_page') }}" data-i18n="landing_hero_cta">Get started</a>
+      <a class="btn ghost" href="#how" data-i18n="landing_services_title">How it works</a>
+    </div>
+    <div class="trust-row">
+      <span data-i18n="landing_trust_setup">No setup fee</span>
+      <span data-i18n="landing_trust_support">Premium support</span>
+      <span data-i18n="landing_trust_live">Go live in minutes</span>
+    </div>
+  </div>
+  <div class="hero-card" data-reveal>
+    <div>
+      <h3 class="text-lg font-semibold" data-i18n="landing_card_scan_title">Scan to book</h3>
+      <p class="muted" data-i18n="landing_card_scan_sub">Clients scan QR and reserve a slot in seconds.</p>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold" data-i18n="landing_card_agent_title">Agent booking</h3>
+      <p class="muted" data-i18n="landing_card_agent_sub">Agents can book on behalf of clients.</p>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold" data-i18n="landing_card_always_title">Always on</h3>
+      <p class="muted" data-i18n="landing_card_always_sub">24/7 service coverage for your salon.</p>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="how-grid" data-reveal>
+  <div class="tile">
+    <h3 class="text-lg font-semibold" data-i18n="landing_step1_title">1. Sign up</h3>
+    <p class="muted" data-i18n="landing_step1_sub">Create your owner account in seconds.</p>
+  </div>
+  <div class="tile">
+    <h3 class="text-lg font-semibold" data-i18n="landing_step2_title">2. Configure</h3>
+      <p class="muted" data-i18n="landing_step2_sub">Choose theme, stylists, chairs, services, and timings.</p>
+  </div>
+  <div class="tile">
+    <h3 class="text-lg font-semibold" data-i18n="landing_step3_title">3. Share</h3>
+    <p class="muted" data-i18n="landing_step3_sub">Publish your dashboard and share your booking link.</p>
+  </div>
+</section>
+
+
+<section id="services" class="feature-grid" data-reveal>
+  <div class="tile">
+    <h3 class="text-lg font-semibold" data-i18n="landing_feature_owner_title">Owner dashboard</h3>
+      <p class="muted" data-i18n="landing_feature_owner_sub">Select theme, chairs, stylists, timings, and activation.</p>
+  </div>
+  <div class="tile">
+    <h3 class="text-lg font-semibold" data-i18n="landing_feature_client_title">Client login</h3>
+    <p class="muted" data-i18n="landing_feature_client_sub">Clients login through landing page and reach your salon dashboard.</p>
+  </div>
+  <div class="tile">
+    <h3 class="text-lg font-semibold" data-i18n="landing_feature_oneclick_title">One click create</h3>
+    <p class="muted" data-i18n="landing_feature_oneclick_sub">Create and share your dashboard link instantly.</p>
+  </div>
+</section>
+
+<section class="pricing" data-reveal>
+  <div class="pricing-head">
+    <h2 class="text-2xl font-semibold" data-i18n="pricing_title">Pricing</h2>
+    <p class="muted" data-i18n="pricing_sub">Simple plans for every salon size.</p>
+  </div>
+  <div class="pricing-grid">
+    <article class="pricing-card">
+      <h3 class="text-lg font-semibold" data-i18n="pricing_starter_title">Starter</h3>
+      <p class="price">$19/mo</p>
+      <ul>
+        <li data-i18n="pricing_starter_item1">1 salon dashboard</li>
+        <li data-i18n="pricing_starter_item2">Booking page + QR</li>
+        <li data-i18n="pricing_starter_item3">Up to 3 stylists</li>
+        <li data-i18n="pricing_starter_item4">Basic services list</li>
+        <li data-i18n="pricing_starter_item5">Email support</li>
+      </ul>
+    </article>
+    <article class="pricing-card featured">
+      <h3 class="text-lg font-semibold" data-i18n="pricing_pro_title">Pro</h3>
+      <p class="price">$49/mo</p>
+      <ul>
+        <li data-i18n="pricing_pro_item1">Unlimited stylists</li>
+        <li data-i18n="pricing_pro_item2">Packages + reminders</li>
+        <li data-i18n="pricing_pro_item3">Custom booking page text</li>
+        <li data-i18n="pricing_pro_item4">Owner edit access</li>
+        <li data-i18n="pricing_pro_item5">Priority support</li>
+      </ul>
+    </article>
+    <article class="pricing-card">
+      <h3 class="text-lg font-semibold" data-i18n="pricing_business_title">Business</h3>
+      <p class="price">$99/mo</p>
+      <ul>
+        <li data-i18n="pricing_business_item1">Up to 5 locations</li>
+        <li data-i18n="pricing_business_item2">Admin controls</li>
+        <li data-i18n="pricing_business_item3">Deactivate/activate</li>
+        <li data-i18n="pricing_business_item4">Advanced booking (future)</li>
+        <li data-i18n="pricing_business_item5">Dedicated onboarding</li>
+      </ul>
+    </article>
+  </div>
+</section>
+</div>
+{% endblock %}

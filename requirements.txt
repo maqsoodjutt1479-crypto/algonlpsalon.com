@@ -1,0 +1,6 @@
+﻿flask==3.0.3
+qrcode==7.4.2
+pillow==10.4.0
+python-dotenv==1.0.1
+twilio==9.4.4
+supabase==2.6.0

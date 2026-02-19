@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% set title = "Owner Sign up" %}
+{% block content %}
+<section class="card narrow space-y-4" data-reveal>
+  <h2>Owner sign up</h2>
+  <p class="muted">Create your account to build your dashboard.</p>
+  {% if error %}
+    <div class="alert">{{ error }}</div>
+  {% endif %}
+  <form method="post" action="{{ url_for('signup') }}" class="form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+    <label>Full name</label>
+    <input type="text" name="name" required />
+
+    <label>Email</label>
+    <input type="email" name="email" required />
+
+    <label>Phone</label>
+    <input type="text" name="phone" required />
+
+    <label>Password</label>
+    <input type="password" name="password" minlength="8" required />
+
+    <button class="btn primary" type="submit">Create account</button>
+  </form>
+</section>
+{% endblock %}

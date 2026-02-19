@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% set title = "Scan QR" %}
+{% block content %}
+<section class="card wide space-y-4" data-reveal>
+  <div class="dash-top">
+    <div>
+      <h2>Scan QR Code</h2>
+      <p class="muted">Point your camera at a salon booking QR.</p>
+    </div>
+    <a class="btn ghost" href="{{ url_for('landing') }}">Back</a>
+  </div>
+
+  <div class="scan-wrap">
+    <video id="qr-video" class="scan-video" autoplay playsinline></video>
+    <canvas id="qr-canvas" class="scan-canvas"></canvas>
+  </div>
+
+  <div id="scan-status" class="muted">Starting camera...</div>
+  {% if slug %}
+    <div class="muted">If scanning fails, scan this QR with your phone.</div>
+    <div class="scan-qr">
+      <img src="{{ url_for('qr', slug=slug) }}" alt="Booking QR" />
+      <a class="btn ghost" href="{{ url_for('book', slug=slug) }}">Open booking page</a>
+    </div>
+    <div class="muted">Or paste the booking link below.</div>
+  {% else %}
+    <div class="alert">Missing salon slug. Open this page like `/scan/your-salon-slug`.</div>
+  {% endif %}
+  <form class="form" onsubmit="return openManualLink(event)">
+    <input
+      type="text"
+      id="manual-link"
+      placeholder="https://.../book/your-salon"
+      value="{% if slug %}{{ url_for('book', slug=slug, _external=True) }}{% endif %}"
+    />
+    <button class="btn primary" type="submit">Open booking page</button>
+  </form>
+</section>
+
+<script>
+  const video = document.getElementById('qr-video');
+  const canvas = document.getElementById('qr-canvas');
+  const statusEl = document.getElementById('scan-status');
+  const manualInput = document.getElementById('manual-link');
+  const ctx = canvas.getContext('2d');
+
+  function openManualLink(event) {
+    event.preventDefault();
+    const value = manualInput.value.trim();
+    if (value) {
+      window.location.href = value;
+    }
+    return false;
+  }
+
+  async function startScan() {
+    if (!('BarcodeDetector' in window)) {
+      statusEl.textContent = 'QR scanning not supported in this browser.';
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      video.srcObject = stream;
+      statusEl.textContent = 'Scanning...';
+
+      const detector = new BarcodeDetector({ formats: ['qr_code'] });
+
+      const tick = async () => {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          try {
+            const barcodes = await detector.detect(canvas);
+            if (barcodes.length) {
+              const url = barcodes[0].rawValue;
+              statusEl.textContent = 'QR detected. Opening...';
+              stream.getTracks().forEach((t) => t.stop());
+              window.location.href = url;
+              return;
+            }
+          } catch (err) {
+            statusEl.textContent = 'Scanning error. Paste the link below.';
+          }
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    } catch (err) {
+      statusEl.textContent = 'Camera access denied. Paste the link below.';
+    }
+  }
+
+  startScan();
+</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set title = "My Dashboards" %}
+{% block content %}
+<section class="owner-summary" data-reveal>
+  <div>
+    <h1 data-i18n="owner_summary_title">My dashboards</h1>
+    <p class="muted">{{ email }}</p>
+  </div>
+  <a class="btn primary" href="{{ url_for('owner_setup') }}" data-i18n="owner_create">Create dashboard</a>
+</section>
+
+{% if dashboards %}
+  <div class="owner-card-grid">
+    {% for dash in dashboards %}
+      <article class="owner-card" data-theme="{{ dash.theme }}" data-reveal>
+        <div class="owner-card-top">
+          <div>
+            <h2>{{ dash.salon_name }}</h2>
+            <p class="muted">Open {{ dash.open_time }} - {{ dash.close_time }}</p>
+            <p class="muted">/dashboard/{{ dash.slug }}</p>
+          </div>
+          <span class="status-pill {{ 'inactive' if not dash.active else '' }}">
+            {{ 'Active' if dash.active else 'Inactive' }}
+          </span>
+        </div>
+
+        <div class="owner-card-actions">
+          <a class="btn ghost" href="{{ url_for('dashboard', slug=dash.slug) }}" data-i18n="owner_open">Open</a>
+          <a class="btn ghost" href="{{ url_for('owner_edit', slug=dash.slug) }}" data-i18n="owner_edit">Edit</a>
+          <form method="post" action="{{ url_for('owner_toggle', owner_id=dash.id) }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+            <button class="btn primary" type="submit">
+              <span data-i18n="{{ 'owner_deactivate' if dash.active else 'owner_activate' }}">
+                {{ 'Deactivate' if dash.active else 'Activate' }}
+              </span>
+            </button>
+          </form>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <section class="card narrow">
+    <h2>No dashboards yet</h2>
+    <p>Create your first dashboard to see it listed here.</p>
+    <a class="btn primary" href="{{ url_for('owner_setup') }}">Create dashboard</a>
+  </section>
+{% endif %}
+{% endblock %}

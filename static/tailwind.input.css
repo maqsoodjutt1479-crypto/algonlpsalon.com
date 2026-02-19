@@ -1,0 +1,218 @@
+@config "../tailwind.config.js";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --accent: #e3a6b5;
+    --accent-strong: #cf7f95;
+    --accent-ink: #3a1e2a;
+    --accent-glow: rgba(227, 166, 181, 0.35);
+  }
+  [data-theme="ink"] {
+    --accent: #d9b58a;
+    --accent-strong: #c2935f;
+    --accent-ink: #2a1b12;
+    --accent-glow: rgba(217, 181, 138, 0.35);
+  }
+  [data-theme="mint"] {
+    --accent: #9bb79b;
+    --accent-strong: #7fa07f;
+    --accent-ink: #1c2b1f;
+    --accent-glow: rgba(155, 183, 155, 0.35);
+  }
+  body {
+    @apply min-h-screen text-noir-800 dark:text-sand-50;
+    font-family: "Manrope", system-ui, sans-serif;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(255, 244, 248, 0.95), transparent 55%),
+      radial-gradient(circle at 90% 12%, rgba(247, 228, 235, 0.85), transparent 45%),
+      linear-gradient(135deg, #fff6f9 0%, #f7e9ef 45%, #fdf3f6 100%);
+  }
+  .dark body {
+    background:
+      radial-gradient(circle at 10% 10%, rgba(76, 46, 56, 0.55), transparent 55%),
+      radial-gradient(circle at 90% 15%, rgba(40, 28, 32, 0.82), transparent 45%),
+      linear-gradient(135deg, #1b1416 0%, #161013 45%, #0f0b0d 100%);
+  }
+  h1, h2, h3 {
+    @apply text-noir-900 dark:text-sand-50;
+    font-family: "Playfair Display", serif;
+  }
+  p {
+    @apply leading-relaxed;
+  }
+  a {
+    @apply transition-colors;
+  }
+  [dir="rtl"] body {
+    font-family: "Noto Naskh Arabic", "Manrope", serif;
+  }
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3 {
+    font-family: "Noto Naskh Arabic", "Manrope", serif;
+  }
+  [dir="rtl"] .form label {
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  [dir="rtl"] .site-header {
+    direction: rtl;
+  }
+  [dir="rtl"] .site-nav {
+    flex-direction: row-reverse;
+  }
+}
+
+@layer components {
+  .page { @apply px-5 py-8 md:px-10 lg:px-16; }
+  .page-frame {
+    @apply relative mx-auto max-w-6xl space-y-10 rounded-[28px] border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/70 p-6 md:p-10 shadow-[0_30px_80px_rgba(18,15,12,0.18)] backdrop-blur overflow-hidden;
+  }
+  .page-frame::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    background: radial-gradient(circle at top right, rgba(227, 166, 181, 0.2), transparent 45%);
+    pointer-events: none;
+  }
+  .site-header {
+    @apply mx-auto mt-4 max-w-6xl rounded-full border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/70 px-5 py-3 backdrop-blur flex flex-wrap items-center justify-between gap-3;
+  }
+  .site-nav { @apply flex flex-wrap items-center gap-4 text-sm font-semibold; }
+  .nav-link { @apply text-noir-700 dark:text-sand-100 hover:text-noir-900 dark:hover:text-white; }
+  .site-footer { @apply mx-auto max-w-6xl px-6 pb-10 text-sm text-noir-500 dark:text-sand-200/80; }
+  .brand { @apply text-lg tracking-wide; font-family: "Playfair Display", serif; }
+  .header-controls { @apply flex items-center gap-2; }
+  .lang-select { @apply rounded-full border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/70 px-3 py-2 text-sm text-noir-900 dark:text-sand-50; }
+  .btn { @apply inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold tracking-wide transition-all; }
+  .btn.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    box-shadow: 0 12px 30px var(--accent-glow);
+  }
+  .btn.primary:hover {
+    background: var(--accent-strong);
+  }
+  .btn.ghost { @apply border border-noir-200/70 dark:border-sand-200/30 text-noir-700 dark:text-sand-100 hover:bg-noir-100/70 dark:hover:bg-noir-800/70; }
+  .card { @apply bg-white/75 dark:bg-noir-900/70 border border-sand-200/70 dark:border-noir-700/70 rounded-[26px] p-6 md:p-8 shadow-[0_20px_60px_rgba(18,15,12,0.15)] backdrop-blur; }
+  .card.narrow { @apply max-w-xl mx-auto; }
+  .card.wide { @apply max-w-4xl mx-auto; }
+  .tile { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/60 dark:bg-noir-900/50 p-5 shadow-[0_18px_45px_rgba(18,15,12,0.1)]; }
+  .muted { @apply text-noir-500 dark:text-sand-200/80; }
+  .lead { @apply text-lg md:text-xl text-noir-500 dark:text-sand-200/80; }
+  .eyebrow { @apply uppercase tracking-[0.35em] text-xs text-noir-500 dark:text-sand-200/80; }
+  .label { @apply uppercase tracking-[0.3em] text-[11px] text-noir-500 dark:text-sand-200/80; }
+  .pill { @apply rounded-full border border-sand-200/70 dark:border-noir-700/70 px-3 py-1 text-xs font-semibold text-noir-700 dark:text-sand-100; }
+  .status-pill { @apply rounded-full border border-sand-200/70 dark:border-noir-700/70 px-3 py-1 text-xs font-semibold; }
+  .status-pill.inactive { @apply bg-noir-100/80 text-noir-700 dark:bg-noir-800/80 dark:text-sand-100; }
+  .landing {
+    @apply relative rounded-[28px] border border-sand-200/70 dark:border-noir-700/70 bg-gradient-to-br from-white/90 via-white/70 to-sand-100/60 dark:from-noir-900/70 dark:via-noir-900/60 dark:to-noir-800/60 p-6 md:p-10 overflow-hidden;
+    background-image: linear-gradient(135deg, rgba(255, 245, 249, 0.95), rgba(250, 234, 242, 0.75), rgba(255, 241, 246, 0.85));
+  }
+  .landing::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 0% 100%, rgba(227, 166, 181, 0.2), transparent 50%);
+    pointer-events: none;
+  }
+  .hero { @apply grid gap-10 lg:grid-cols-2 items-center; }
+  .hero-card { @apply grid gap-5 rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/60 p-6; }
+  .trust-row { @apply flex flex-wrap gap-2; }
+  .trust-row span { @apply inline-flex items-center rounded-full border border-sand-200/70 dark:border-noir-700/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-noir-600 dark:text-sand-200/80; }
+  .how-grid { @apply grid gap-4 md:grid-cols-3; }
+  .feature-grid { @apply grid gap-4 md:grid-cols-3; }
+  .cta-row { @apply flex flex-wrap gap-3; }
+  .pricing { @apply grid gap-6; }
+  .pricing-head { @apply flex flex-wrap items-end justify-between gap-4; }
+  .pricing-grid { @apply grid gap-4 md:grid-cols-3; }
+  .pricing-card { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/60 p-5 grid gap-3; }
+  .pricing-card.featured {
+    border-color: var(--accent);
+    box-shadow: 0 20px 50px var(--accent-glow);
+  }
+  .pricing-card ul { @apply grid gap-2 text-sm text-noir-600 dark:text-sand-200/80; }
+  .price { @apply text-2xl font-semibold; }
+  .owner-summary { @apply flex flex-wrap items-center justify-between gap-4; }
+  .owner-card-grid { @apply grid gap-4 md:grid-cols-3; }
+  .owner-card { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/60 p-5 grid gap-4; }
+  .owner-card-top { @apply flex flex-wrap justify-between gap-4; }
+  .owner-card-actions { @apply flex flex-wrap gap-2; }
+  .booking-shell { @apply grid gap-4; }
+  .booking-top { @apply flex items-center justify-between gap-4; }
+  .form { @apply grid gap-5; }
+  .form-row { @apply grid gap-4 md:grid-cols-2; }
+  .form label { @apply text-xs font-semibold uppercase tracking-[0.25em] text-noir-500 dark:text-sand-200/80; }
+  .form input,
+  .form select,
+  .form textarea {
+    @apply w-full rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/80 dark:bg-noir-800/60 px-4 py-3 text-noir-900 dark:text-sand-50 focus:outline-none focus:ring-2 focus:ring-sand-300;
+  }
+  .alert { @apply rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700; }
+  .success { @apply rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 font-semibold text-emerald-700; }
+  .link-box { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/60 p-4; }
+  .link-row { @apply flex flex-wrap items-center gap-2; }
+  .choice-row { @apply flex flex-wrap gap-2; }
+  .choice-pill { @apply rounded-full border border-sand-200/70 dark:border-noir-700/70 px-3 py-2 inline-flex items-center gap-2 cursor-pointer text-sm; }
+  .choice-pill input { accent-color: var(--accent); }
+  .service-grid { @apply grid gap-2 md:grid-cols-3; }
+  .service-pill { @apply inline-flex items-center gap-2 rounded-full border border-sand-200/70 dark:border-noir-700/70 px-3 py-2 text-sm; }
+  .service-tag { @apply inline-flex items-center rounded-full border border-sand-200/70 dark:border-noir-700/70 px-3 py-1 text-xs font-semibold; }
+  .barber-list { @apply grid gap-4; }
+  .barber-row { @apply grid gap-3 md:grid-cols-[1fr_auto] items-end; }
+  .toggle { @apply inline-flex items-center gap-2 text-sm font-semibold text-noir-600 dark:text-sand-200/80; }
+  .dashboard-shell { @apply grid gap-8; }
+  .dash-top { @apply flex flex-wrap items-start justify-between gap-4; }
+  .filters { @apply grid gap-3; }
+  .filter-card { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/60 p-5 grid gap-4; }
+  .filter-row { @apply grid gap-3 md:grid-cols-3 lg:grid-cols-5; }
+  .filter-actions { @apply flex flex-wrap justify-end gap-2; }
+  .stat-grid { @apply grid gap-4 md:grid-cols-3; }
+  .stat-card { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/60 p-4 grid gap-2; }
+  .service-mix { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/60 p-5 grid gap-3; }
+  .service-stack { @apply grid gap-2; }
+  .service-line { @apply flex items-center justify-between rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/50 px-4 py-3; }
+  .premium-panel { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/60 p-5 grid gap-3; }
+  .package-grid { @apply grid gap-3 md:grid-cols-3; }
+  .package-card { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/50 p-4 grid gap-2; }
+  .package-row { @apply grid gap-3 md:grid-cols-4 rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/50 p-4; }
+  .package-list { @apply grid gap-3; }
+  .reminder-row { @apply flex flex-wrap gap-2; }
+  .reminder-tags { @apply flex flex-wrap gap-2; }
+  .bookings-panel { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/60 p-5 grid gap-4; }
+  .booking-tabs { @apply flex flex-wrap gap-2; }
+  .booking-list { @apply grid gap-3; }
+  .booking-row { @apply grid gap-3 md:grid-cols-[1fr_auto_auto] items-center rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/50 p-4; }
+  .booking-row-btn { @apply w-full text-left; }
+  .booking-main { @apply grid gap-3 md:grid-cols-[1fr_auto_auto] items-center; }
+  .booking-status { @apply rounded-full px-3 py-1 text-xs font-semibold; background: var(--accent); color: var(--accent-ink); }
+  .management { @apply grid gap-4 md:grid-cols-2; }
+  .management-card { @apply rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/70 dark:bg-noir-900/60 p-5 grid gap-4; }
+  .toggle-row { @apply flex flex-wrap gap-2 items-center; }
+  .pill-toggle { @apply inline-flex items-center gap-2 rounded-full border border-sand-200/70 dark:border-noir-700/70 px-3 py-2 text-sm; }
+  .timing-grid { @apply grid gap-3; }
+  .timing-row { @apply grid gap-3 md:grid-cols-[140px_1fr_1fr_auto] items-center; }
+  .drawer { @apply fixed inset-0 bg-black/40 opacity-0 pointer-events-none transition-opacity; }
+  .drawer.open { @apply opacity-100 pointer-events-auto; }
+  .drawer-panel { @apply absolute right-0 top-0 h-full w-full max-w-md border-l border-sand-200/70 dark:border-noir-700/70 bg-white/80 dark:bg-noir-900/70 p-6 translate-x-full transition-transform; }
+  .drawer.open .drawer-panel { @apply translate-x-0; }
+  .drawer-header { @apply flex items-center justify-between gap-4; }
+  .qr-box { @apply grid gap-3 items-center justify-items-center rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white/60 dark:bg-noir-900/50 p-4; }
+  .qr-box img { @apply h-40 w-40 rounded-2xl border border-sand-200/70 dark:border-noir-700/70 bg-white; }
+}
+
+@layer utilities {
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

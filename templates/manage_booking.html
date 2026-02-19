@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% set hide_owner_nav = true %}
+{% set title = "Manage Appointment" %}
+{% block content %}
+<section class="card narrow booking-shell" data-reveal>
+  <h2>Manage appointment</h2>
+  <p class="muted">{{ booking.salon_name }}</p>
+  <p class="muted">Service: {{ booking.service }}</p>
+  <p class="muted">Current: {{ booking.preferred_date }} {{ booking.preferred_time }}</p>
+  {% if error %}
+    <div class="alert">{{ error }}</div>
+  {% endif %}
+  {% if success %}
+    <div class="success">{{ success }}</div>
+  {% endif %}
+
+  <form method="post" class="form booking-form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+    <input type="hidden" name="action" value="cancel" />
+    <button class="btn ghost" type="submit">Cancel appointment</button>
+  </form>
+
+  <form method="post" class="form booking-form" id="reschedule-form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+    <input type="hidden" name="action" value="reschedule" />
+    <label>Choose stylist</label>
+    <select name="barber_name" id="reschedule-barber" required>
+      {% for barber in barbers %}
+        <option value="{{ barber.name }}" {% if barber.name == booking.barber_name %}selected{% endif %}>
+          {{ barber.name }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <label>Preferred date</label>
+    <input type="date" name="preferred_date" id="reschedule-date" value="{{ booking.preferred_date }}" required />
+
+    <label>Preferred time</label>
+    <select name="preferred_time" id="reschedule-time" required>
+      <option value="">Select a time</option>
+    </select>
+    <div id="reschedule-help" class="muted">Select a date and stylist to see available slots.</div>
+
+    <button class="btn primary" type="submit">Reschedule</button>
+  </form>
+</section>
+
+<script>
+  const dateInput = document.getElementById('reschedule-date');
+  const barberSelect = document.getElementById('reschedule-barber');
+  const timeHelp = document.getElementById('reschedule-help');
+  const timeInput = document.getElementById('reschedule-time');
+
+  function renderSlots(slots) {
+    timeInput.innerHTML = '<option value="">Select a time</option>';
+    if (!slots.length) {
+      timeHelp.textContent = 'No slots available. Select another time or date.';
+      return;
+    }
+    timeHelp.textContent = 'Choose a time slot.';
+    slots.forEach((slot) => {
+      const opt = document.createElement('option');
+      opt.value = slot;
+      opt.textContent = slot;
+      timeInput.appendChild(opt);
+    });
+  }
+
+  async function loadSlots() {
+    const date = dateInput.value;
+    const barber = barberSelect ? barberSelect.value : '';
+    if (!date || !barber) {
+      timeHelp.textContent = 'Select a date and stylist to see available slots.';
+      timeInput.innerHTML = '<option value="">Select a time</option>';
+      return;
+    }
+    timeHelp.textContent = 'Loading slots...';
+    const url = new URL("/api/availability/{{ booking.slug }}", window.location.origin);
+    url.searchParams.set('date', date);
+    url.searchParams.set('barber', barber);
+    try {
+      const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      renderSlots(data.slots || []);
+    } catch (err) {
+      timeHelp.textContent = 'Unable to load slots. Please try again.';
+    }
+  }
+
+  dateInput.addEventListener('change', loadSlots);
+  barberSelect?.addEventListener('change', loadSlots);
+  loadSlots();
+</script>
+{% endblock %}

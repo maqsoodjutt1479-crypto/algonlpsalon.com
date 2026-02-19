@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% set hide_owner_nav = true %}
+{% set title = "Service Unavailable" %}
+{% block content %}
+<section class="card narrow space-y-3" data-reveal>
+  <h2>{{ salon_name }}</h2>
+  <p class="muted">This dashboard is currently inactive. Please contact the salon owner.</p>
+</section>
+{% endblock %}

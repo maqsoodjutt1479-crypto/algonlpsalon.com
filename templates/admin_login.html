@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% set hide_owner_nav = true %}
+{% set title = "Admin Login" %}
+{% block content %}
+<section class="card narrow space-y-4" data-reveal>
+  <h2 data-i18n="admin_login">Admin login</h2>
+  <p class="muted">Authorized access only.</p>
+  {% if error %}
+    <div class="alert">{{ error }}</div>
+  {% endif %}
+  <form method="post" class="form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+    <label>Email</label>
+    <input type="email" name="email" required />
+    <label>Password</label>
+    <input type="password" name="password" required />
+    <button class="btn primary" type="submit">Login</button>
+  </form>
+</section>
+{% endblock %}

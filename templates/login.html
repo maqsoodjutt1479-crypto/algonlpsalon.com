@@ -1,0 +1,19 @@
+﻿{% extends "base.html" %}
+{% set title = "Owner Login" %}
+{% block content %}
+<section class="card narrow space-y-4" data-reveal>
+  <h2>Owner login</h2>
+  <p class="muted">Use your email and password to continue.</p>
+  {% if error %}
+    <div class="alert">{{ error }}</div>
+  {% endif %}
+  <form method="post" class="form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+    <label>Email</label>
+    <input type="email" name="email" placeholder="owner@salon.com" required />
+    <label>Password</label>
+    <input type="password" name="password" required />
+    <button class="btn primary" type="submit">Continue</button>
+  </form>
+</section>
+{% endblock %}
